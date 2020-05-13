@@ -1,0 +1,8 @@
+syntax: glob
+
+.stack-work/
+dist-newstyle
+test/*.log
+test/*.aux
+stack*.yaml.lock
+test/auto
