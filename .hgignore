@@ -4,5 +4,6 @@ syntax: glob
 dist-newstyle
 test/*.log
 test/*.aux
+test/*.out
 stack*.yaml.lock
 test/auto

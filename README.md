@@ -14,6 +14,12 @@ main = do
   T.putStrLn $ pdftotext Physical pdf
 ```
 
+## Flags
+
+### `xml-conduit`
+
+`pdftotext` can extract properties from PDF document. One of them is metadata which is in form of XML document. If `xml-conduit` flag is set then the metadata is parsed using `xml-conduit` package, otherwise provided as text.
+
 ## Internals
 
 The library uses poppler via FFI, therefore internally all functions are of type `IO`. However, their non-`IO` variants (using `unsafePerformIO`) _should be_ safe to use. Module `Pdftotext.Internal` exposes all `IO`-typed functions.

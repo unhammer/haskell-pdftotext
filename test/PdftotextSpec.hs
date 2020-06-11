@@ -1,5 +1,6 @@
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module PdftotextSpec (spec) where
 
@@ -30,3 +31,13 @@ spec = do
         pagesTotal doc `shouldBe` 4
       it "should contain correct number of pages (`pages`)" \(Just doc) ->
         length (pages doc) `shouldBe` 4
+
+    describe "PDF properties" do
+      it "should contain all fields" \(Just doc) -> do
+        let Properties {..} = properties doc
+        author `shouldBe` Just "G. Eyaeb"
+        title `shouldBe` Just "Simple document for testing"
+        creator `shouldBe` Just "pdflatex"
+        producer `shouldBe` Just "LaTeX with hyperref"
+        keywords `shouldBe` Just "haskell,pdf"
+        subject `shouldBe` Just "Testing"

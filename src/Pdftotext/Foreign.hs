@@ -24,9 +24,16 @@ module Pdftotext.Foreign
     -- * FFI
     ffiOpenPdf,
     ffiOpenData,
+    ffiDocumentAuthor,
+    ffiDocumentCreator,
     ffiDocumentDelete,
-    ffiDocumentPages,
+    ffiDocumentKeywords,
+    ffiDocumentMetadata,
     ffiDocumentOpenPage,
+    ffiDocumentPages,
+    ffiDocumentProducer,
+    ffiDocumentSubject,
+    ffiDocumentTitle,
     ffiPageDelete,
     ffiPageText,
     ffiStringLength,
@@ -59,6 +66,27 @@ foreign import ccall unsafe "&poppler_document_delete"
 
 foreign import ccall unsafe "poppler_document_pages"
   ffiDocumentPages :: Ptr Poppler_Document -> IO CInt
+
+foreign import ccall unsafe "poppler_document_author"
+  ffiDocumentAuthor :: Ptr Poppler_Document -> IO StdString
+
+foreign import ccall unsafe "poppler_document_creator"
+  ffiDocumentCreator :: Ptr Poppler_Document -> IO StdString
+
+foreign import ccall unsafe "poppler_document_producer"
+  ffiDocumentProducer :: Ptr Poppler_Document -> IO StdString
+
+foreign import ccall unsafe "poppler_document_subject"
+  ffiDocumentSubject :: Ptr Poppler_Document -> IO StdString
+
+foreign import ccall unsafe "poppler_document_title"
+  ffiDocumentTitle :: Ptr Poppler_Document -> IO StdString
+
+foreign import ccall unsafe "poppler_document_keywords"
+  ffiDocumentKeywords :: Ptr Poppler_Document -> IO StdString
+
+foreign import ccall unsafe "poppler_document_metadata"
+  ffiDocumentMetadata :: Ptr Poppler_Document -> IO StdString
 
 foreign import ccall unsafe "poppler_document_open_page"
   ffiDocumentOpenPage :: Ptr Poppler_Document -> CInt -> IO (Ptr Poppler_Page)

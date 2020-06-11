@@ -20,6 +20,10 @@ Portability : POSIX
 >   Just pdf <- openFile "path/to/file.pdf"
 >   T.putStrLn $ pdftotext Physical pdf
 
+=== Flags
+
+* @xml-conduit@ – 'metadata' of PDF document properties is parsed as XML, otherwise remains as text
+
 -}
 {- ORMOLU_ENABLE -}
 module Pdftotext
@@ -27,6 +31,7 @@ module Pdftotext
     Document,
     Layout (..),
     Page,
+    Properties (..),
 
     -- * Loading PDF's
     openByteString,
@@ -37,6 +42,7 @@ module Pdftotext
     pages,
     pagesTotal,
     pdftotext,
+    properties,
 
     -- * Page functions
     pageNumber,
@@ -66,6 +72,12 @@ pages = unsafePerformIO . pagesIO
 -- | Return number of pages contained in document.
 pagesTotal :: Document -> Int
 pagesTotal = unsafePerformIO . pagesTotalIO
+
+-- | Extract properties from the document.
+--
+-- @since 0.0.2.0
+properties :: Document -> Properties
+properties = unsafePerformIO . propertiesIO
 
 -- | Extract text from PDF document with given 'Layout'.
 pdftotext :: Layout -> Document -> Text
