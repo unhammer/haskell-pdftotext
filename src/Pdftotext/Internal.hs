@@ -1,5 +1,5 @@
 {-# LANGUAGE BlockArguments #-}
-{-# LANGUAGE CPP #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 {- ORMOLU_DISABLE -}
 {-|
@@ -42,12 +42,8 @@ import Data.ByteString.Internal
 import qualified Data.Text as T
 import Foreign (ForeignPtr, newForeignPtr, nullPtr, withForeignPtr)
 import Foreign.C (withCString)
+import GHC.Generics
 import Pdftotext.Foreign
-
-#ifdef XMLC
-import qualified Text.XML as X
-import qualified Data.Text.Lazy as TL
-#endif
 
 newtype Document = Document (ForeignPtr Poppler_Document)
 
@@ -60,16 +56,12 @@ data Properties = Properties
   { author :: Maybe T.Text,
     creator :: Maybe T.Text,
     keywords :: Maybe T.Text,
-#ifdef XMLC
-    metadata :: Maybe X.Document,
-#else
     metadata :: Maybe T.Text,
-#endif
     producer :: Maybe T.Text,
     subject :: Maybe T.Text,
     title :: Maybe T.Text
   }
-  deriving (Show)
+  deriving (Show, Generic)
 
 data Page = Page
   { -- | Number of this page in original document.
@@ -148,6 +140,7 @@ pageTextIO layout (Page _ _ ptr) = withForeignPtr ptr \p -> asText (ffiPageText 
         None -> 2
 
 -- | Extract properties from the document.
+--
 -- @since 0.0.2.0
 propertiesIO :: Document -> IO Properties
 propertiesIO (Document docptr) = withForeignPtr docptr \doc -> do
@@ -158,22 +151,12 @@ propertiesIO (Document docptr) = withForeignPtr docptr \doc -> do
   p <- asText $ ffiDocumentProducer doc
   s <- asText $ ffiDocumentSubject doc
   t <- asText $ ffiDocumentTitle doc
-
-#ifdef XMLC
-  return $ Properties (f a) (f c) (f k) (xml m) (f p) (f s) (f t)
-  where
-    xml x =
-      if T.null x
-      then Nothing
-      else either (const Nothing) Just $ X.parseText X.def (TL.fromStrict x)
-#else
   return $ Properties (f a) (f c) (f k) (f m) (f p) (f s) (f t)
   where
-#endif
     f x =
       if T.null x
-      then Nothing
-      else Just x
+        then Nothing
+        else Just x
 
 -- | Extract text from PDF document with given 'Layout'.
 pdftotextIO :: Layout -> Document -> IO T.Text

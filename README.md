@@ -14,11 +14,38 @@ main = do
   T.putStrLn $ pdftotext Physical pdf
 ```
 
-## Flags
+## Executable
 
-### `xml-conduit`
+`pdftotext` comes with executable program `pdftotext.hs` which can print text extracted from PDF and basic information from the document.
 
-`pdftotext` can extract properties from PDF document. One of them is metadata which is in form of XML document. If `xml-conduit` flag is set then the metadata is parsed using `xml-conduit` package, otherwise provided as text.
+```shell
+$> pdftotext.hs info test/simple.pdf
+File      : test/simple.pdf
+Pages     : 4
+Properties
+  Title   : Simple document for testing
+  Author  : G. Eyaeb
+  Subject : Testing
+  Creator : pdflatex
+  Producer: LaTeX with hyperref
+  Keywords: haskell,pdf
+```
+
+```shell
+$> pdftotext.hs print --pages 1,4 test/simple.pdf
+Simple document for testing
+
+                  deserve neither
+liberty nor safety.
+```
+
+See help for more information:
+
+```shell
+$> pdftotext.hs --help
+$> pdftotext.hs print --help
+$> pdftotext.hs info --help
+```
 
 ## Internals
 
