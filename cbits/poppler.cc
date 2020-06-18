@@ -3,6 +3,36 @@
 #include <iostream>
 #include <string.h>
 
+/*
+
+Failed attempt to make poppler quiet
+====================================
+
+
+
+#include "Error.h"
+#include "GlobalParams.h"
+
+static void errorcb(ErrorCategory, Goffset pos, const char *msg) {
+  ...
+}
+
+setErrorCallback(errorcb);
+globalParams = std::make_unique<GlobalParams>();
+globalParams->setErrQuiet(true);
+
+
+
+Do not forget to add poppler to pkgconfig-depends.
+
+Neither setting error callback nor setting global param makes
+poppler quiet. It seems that the errQuiet flag is set
+and the changes are visible inside poppler.cc, however
+they seem not to be visible by poppler library. I probably
+do something wrong.
+
+*/
+
 extern "C" {
 
   std::string* to_stdstring(poppler::ustring ust) {
