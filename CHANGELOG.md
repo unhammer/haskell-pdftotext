@@ -1,6 +1,6 @@
 # Revision history for pdftotext
 
-## 0.1.0.0 -- 
+## 0.1.0.0 -- 2020-06-18
 
 * Added executable `pdftotext.hs`
 * Removed `xml-conduit` flag, it was bad idea, sorry for that

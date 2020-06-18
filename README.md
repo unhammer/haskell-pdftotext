@@ -32,7 +32,7 @@ Properties
 ```
 
 ```shell
-$> pdftotext.hs print --pages 1,4 test/simple.pdf
+$> pdftotext.hs text --pages 1,4 test/simple.pdf
 Simple document for testing
 
                   deserve neither
@@ -43,7 +43,7 @@ See help for more information:
 
 ```shell
 $> pdftotext.hs --help
-$> pdftotext.hs print --help
+$> pdftotext.hs text --help
 $> pdftotext.hs info --help
 ```
 

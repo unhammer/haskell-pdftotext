@@ -20,24 +20,24 @@ import Pdftotext.Internal
 import qualified Text.PrettyPrint.ANSI.Leijen as P
 
 data Command
-  = Print PrintOptions
+  = PrintText PrintTextOptions
   | Info InfoOptions
 
-data PrintOptions = PrintOptions
-  { prtFile :: FilePath,
-    prtPages :: [Range Int],
+data PrintTextOptions = PrintTextOptions
+  { prtPages :: [Range Int],
     prtOutfile :: Maybe FilePath,
     prtSeparate :: Bool,
     prtColor :: Bool,
-    prtViewer :: Bool
+    prtViewer :: Bool,
+    prtFile :: FilePath
   }
   deriving (Show)
 
 data InfoFormat = JsonFormat | PlainFormat deriving (Eq, Show)
 
 data InfoOptions = InfoOptions
-  { infFile :: FilePath,
-    infFormat :: InfoFormat
+  { infFormat :: InfoFormat,
+    infFile :: FilePath
   }
   deriving (Show)
 
@@ -58,19 +58,20 @@ instance ToJSON Information where
 
 main :: IO ()
 main =
-  execParser
+  customExecParser
+    (prefs $ showHelpOnEmpty <> showHelpOnError)
     ( info
         (commandParser <**> helper)
         (fullDesc <> progDesc "Extract text from PDF")
     )
     >>= \case
-      Print opts -> printDocument opts
+      PrintText opts -> printText opts
       Info opts -> printInfo opts
 
 commandParser :: Parser Command
 commandParser =
   hsubparser
-    ( command "print" (info printOptions (progDesc "Print extracted text" <> footer "RANGE: -3,5,7-12,15,20-"))
+    ( command "text" (info printOptions (progDesc "Print extracted text" <> footer "RANGE: -3,5,7-12,15,20-"))
         <> command "info" (info infoOptions (progDesc "Show information about document"))
     )
 
@@ -78,8 +79,19 @@ infoOptions :: Parser Command
 infoOptions =
   fmap Info $
     InfoOptions
-      <$> strArgument (metavar "FILE" <> help "PDF file")
-      <*> option format (long "format" <> short 'f' <> help "Output format (plain, json)" <> value PlainFormat)
+      <$> option
+        format
+        ( long "format"
+            <> short 'f'
+            <> help "Output format (plain, json)"
+            <> value PlainFormat
+            <> completeWith ["plain", "json"]
+        )
+      <*> strArgument
+        ( metavar "FILE"
+            <> help "PDF file"
+            <> completer (bashCompleter "file")
+        )
   where
     format =
       eitherReader \case
@@ -89,19 +101,30 @@ infoOptions =
 
 printOptions :: Parser Command
 printOptions =
-  fmap Print $
-    PrintOptions
-      <$> strArgument (metavar "FILE" <> help "PDF file")
-      <*> option range (long "pages" <> short 'p' <> help "Range of pages to process" <> metavar "RANGE" <> value [])
+  fmap PrintText $
+    PrintTextOptions
+      <$> option
+        range
+        ( long "pages"
+            <> short 'p'
+            <> help "Range of pages to process"
+            <> metavar "RANGE"
+            <> value []
+        )
       <*> pure Nothing -- switch (metavar "FILE" <> long "output" <> short 'o' <> help "Write output to file")
       <*> pure False -- switch (long "separate" <> help "Separate pages")
       <*> pure False -- switch (long "color" <> short "c" <> help "Use colors")
       <*> pure False -- switch (long "viewer" <> short "v" <> help "Use internal viewer")
+      <*> strArgument
+        ( metavar "FILE"
+            <> help "PDF file"
+            <> completer (bashCompleter "file")
+        )
   where
     range = eitherReader (first show . parseRanges)
 
-printDocument :: PrintOptions -> IO ()
-printDocument PrintOptions {..} = do
+printText :: PrintTextOptions -> IO ()
+printText PrintTextOptions {..} = do
   f <- openFile prtFile
   case f of
     Just d -> do
