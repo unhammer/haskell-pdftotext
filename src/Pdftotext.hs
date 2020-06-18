@@ -20,10 +20,6 @@ Portability : POSIX
 >   Just pdf <- openFile "path/to/file.pdf"
 >   T.putStrLn $ pdftotext Physical pdf
 
-=== Flags
-
-* @xml-conduit@ – 'metadata' of PDF document properties is parsed as XML, otherwise remains as text
-
 -}
 {- ORMOLU_ENABLE -}
 module Pdftotext

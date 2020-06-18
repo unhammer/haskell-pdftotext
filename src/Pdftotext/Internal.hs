@@ -49,8 +49,6 @@ newtype Document = Document (ForeignPtr Poppler_Document)
 
 -- | Document properties.
 --
--- If flag @xml-conduit@ is set, 'metadata' is of type @Maybe Text.XML.Document@.
---
 -- @since 0.0.2.0
 data Properties = Properties
   { author :: Maybe T.Text,
