@@ -1,5 +1,8 @@
 # pdftotext
 
+![CI](https://github.com/akirak/haskell-pdftotext/workflows/build/badge.svg)
+[![Cachix Cache](https://img.shields.io/badge/cachix-akirak-blue.svg)](https://akirak.cachix.org)
+
 The `pdftotext` package provides functions for extraction of plain text from PDF documents. It uses C++ library [Poppler](https://poppler.freedesktop.org/), which is required to be installed in the system. Output of Haskell `pdftotext` library is identical to output of Poppler's tool `pdftotext`.
 
 ## Usage
