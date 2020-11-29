@@ -1,0 +1,7 @@
+.stack-work/
+dist-newstyle
+test/*.log
+test/*.aux
+test/*.out
+stack*.yaml.lock
+test/auto
