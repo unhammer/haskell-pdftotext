@@ -66,11 +66,12 @@ data Page = Page
     pageNumber :: Int,
     -- | Total number of pages in original document.
     pageOutOf :: Int,
+    pageDocument :: ForeignPtr Poppler_Document,
     pagePtr :: ForeignPtr Poppler_Page
   }
 
 instance Show Page where
-  show (Page n o _) = "Page " ++ show n ++ "/" ++ show o
+  show (Page n o _ _) = "Page " ++ show n ++ "/" ++ show o
 
 -- | Layout of text extracted from PDF.
 data Layout
@@ -112,14 +113,14 @@ pagesIO (Document doc) = do
     pageno <- ffiDocumentPages docptr
     forM [0 .. pageno - 1] \pno -> do
       p <- ffiDocumentOpenPage docptr pno >>= newForeignPtr ffiPageDelete
-      return $ Page (fromIntegral pno + 1) (fromIntegral pageno) p
+      return $ Page (fromIntegral pno + 1) (fromIntegral pageno) doc p
 
 -- | Return page number 'no' from PDF document, if the page exists.
 pageIO :: Int -> Document -> IO (Maybe Page)
 pageIO no d@(Document docptr) = withForeignPtr docptr \ptr -> do
   pno <- pagesTotalIO d
   if no > 0 && no <= pno
-    then Just . Page no pno <$> (ffiDocumentOpenPage ptr (fromIntegral no - 1) >>= newForeignPtr ffiPageDelete)
+    then Just . Page no pno docptr <$> (ffiDocumentOpenPage ptr (fromIntegral no - 1) >>= newForeignPtr ffiPageDelete)
     else return Nothing
 
 -- | Return number of pages contained in document.
@@ -129,7 +130,7 @@ pagesTotalIO (Document doc) =
 
 -- | Extract text from a page with given 'Layout'.
 pageTextIO :: Layout -> Page -> IO T.Text
-pageTextIO layout (Page _ _ ptr) = withForeignPtr ptr \p -> asText (ffiPageText p l)
+pageTextIO layout (Page _ _ _ ptr) = withForeignPtr ptr \p -> asText (ffiPageText p l)
   where
     l =
       case layout of
