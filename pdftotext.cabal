@@ -29,7 +29,7 @@ library
   hs-source-dirs:      src
   ghc-options:         -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat -Widentities -Wredundant-constraints -fhide-source-paths -Wmissing-export-lists -Wpartial-fields
   default-language:    Haskell2010
-  cc-options:          -Wall -fPIC
+  cc-options:          -Wall -fPIC -std=c++11
   c-sources:           cbits/poppler.cc
                      , cbits/stdstring.cc
   extra-libraries:     stdc++
