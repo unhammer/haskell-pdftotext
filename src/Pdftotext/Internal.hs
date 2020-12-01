@@ -66,7 +66,9 @@ data Page = Page
     pageNumber :: Int,
     -- | Total number of pages in original document.
     pageOutOf :: Int,
-    pageDocument :: ForeignPtr Poppler_Document,
+    -- | Pointer to document which created this page.
+    pageDocumentPtr :: ForeignPtr Poppler_Document,
+    -- | Pointer to this page.
     pagePtr :: ForeignPtr Poppler_Page
   }
 
@@ -91,46 +93,46 @@ data Layout
 openFile :: FilePath -> IO (Maybe Document)
 openFile file =
   withCString file \cfile -> do
-    docptr <- ffiOpenPdf cfile
-    if docptr == nullPtr
+    ptr <- ffiOpenPdf cfile
+    if ptr == nullPtr
       then return Nothing
-      else Just . Document <$> newForeignPtr ffiDocumentDelete docptr
+      else Just . Document <$> newForeignPtr ffiDocumentDelete ptr
 
 -- | Open PDF represented as bytestring. If document cannot be parsed as valid PDF,
 -- `Nothing` is returned.
 openByteStringIO :: ByteString -> IO (Maybe Document)
-openByteStringIO (PS ptr _ len) =
-  withForeignPtr ptr \d -> do
-    docptr <- ffiOpenData d (fromIntegral len)
+openByteStringIO (PS bsfptr _ len) =
+  withForeignPtr bsfptr \bsptr -> do
+    docptr <- ffiOpenData bsptr (fromIntegral len)
     if docptr == nullPtr
       then return Nothing
       else Just . Document <$> newForeignPtr ffiDocumentDelete docptr
 
 -- | Return all pages from document.
 pagesIO :: Document -> IO [Page]
-pagesIO (Document doc) = do
-  withForeignPtr doc \docptr -> do
-    pageno <- ffiDocumentPages docptr
+pagesIO (Document fptr) = do
+  withForeignPtr fptr \ptr -> do
+    pageno <- ffiDocumentPages ptr
     forM [0 .. pageno - 1] \pno -> do
-      p <- ffiDocumentOpenPage docptr pno >>= newForeignPtr ffiPageDelete
-      return $ Page (fromIntegral pno + 1) (fromIntegral pageno) doc p
+      p <- ffiDocumentOpenPage ptr pno >>= newForeignPtr ffiPageDelete
+      return $ Page (fromIntegral pno + 1) (fromIntegral pageno) fptr p
 
 -- | Return page number 'no' from PDF document, if the page exists.
 pageIO :: Int -> Document -> IO (Maybe Page)
-pageIO no d@(Document docptr) = withForeignPtr docptr \ptr -> do
-  pno <- pagesTotalIO d
+pageIO no doc@(Document fptr) = withForeignPtr fptr \ptr -> do
+  pno <- pagesTotalIO doc
   if no > 0 && no <= pno
-    then Just . Page no pno docptr <$> (ffiDocumentOpenPage ptr (fromIntegral no - 1) >>= newForeignPtr ffiPageDelete)
+    then Just . Page no pno fptr <$> (ffiDocumentOpenPage ptr (fromIntegral no - 1) >>= newForeignPtr ffiPageDelete)
     else return Nothing
 
 -- | Return number of pages contained in document.
 pagesTotalIO :: Document -> IO Int
-pagesTotalIO (Document doc) =
-  fromIntegral <$> withForeignPtr doc ffiDocumentPages
+pagesTotalIO (Document fptr) =
+  fromIntegral <$> withForeignPtr fptr ffiDocumentPages
 
 -- | Extract text from a page with given 'Layout'.
 pageTextIO :: Layout -> Page -> IO T.Text
-pageTextIO layout (Page _ _ _ ptr) = withForeignPtr ptr \p -> asText (ffiPageText p l)
+pageTextIO layout (Page _ _ _ fptr) = withForeignPtr fptr \ptr -> asText (ffiPageText ptr l)
   where
     l =
       case layout of
@@ -142,14 +144,14 @@ pageTextIO layout (Page _ _ _ ptr) = withForeignPtr ptr \p -> asText (ffiPageTex
 --
 -- @since 0.0.2.0
 propertiesIO :: Document -> IO Properties
-propertiesIO (Document docptr) = withForeignPtr docptr \doc -> do
-  a <- asText $ ffiDocumentAuthor doc
-  c <- asText $ ffiDocumentCreator doc
-  k <- asText $ ffiDocumentKeywords doc
-  m <- asText $ ffiDocumentMetadata doc
-  p <- asText $ ffiDocumentProducer doc
-  s <- asText $ ffiDocumentSubject doc
-  t <- asText $ ffiDocumentTitle doc
+propertiesIO (Document fptr) = withForeignPtr fptr \ptr -> do
+  a <- asText $ ffiDocumentAuthor ptr
+  c <- asText $ ffiDocumentCreator ptr
+  k <- asText $ ffiDocumentKeywords ptr
+  m <- asText $ ffiDocumentMetadata ptr
+  p <- asText $ ffiDocumentProducer ptr
+  s <- asText $ ffiDocumentSubject ptr
+  t <- asText $ ffiDocumentTitle ptr
   return $ Properties (f a) (f c) (f k) (f m) (f p) (f s) (f t)
   where
     f x =
