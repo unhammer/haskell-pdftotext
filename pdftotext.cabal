@@ -1,7 +1,7 @@
 cabal-version:       >=1.10
 
 name:                pdftotext
-version:             0.1.0.0
+version:             0.1.0.1
 synopsis:            Extracts text from PDF using poppler
 description:         The @pdftotext@ package provides functions for extraction of plain text from PDF documents. It uses C++ library [Poppler](https://poppler.freedesktop.org/), which is required to be installed in the system. Output of Haskell @pdftotext@ library is identical to output of Poppler's tool @pdftotext@.
 homepage:            https://sr.ht/~geyaeb/haskell-pdftotext/
