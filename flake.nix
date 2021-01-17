@@ -30,6 +30,7 @@
               defaultPackage = packages.pdftotext;
               apps.pdftotext = flake-utils.lib.mkApp {
                 drv = packages.pdftotext;
+                name = "pdftotext.hs";
               };
               defaultApp = apps.pdftotext;
               lib.haskellPackages = myHaskellPackages;
